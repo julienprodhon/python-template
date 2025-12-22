@@ -14,6 +14,7 @@ Place these configuration files in the same directory as the script:
 ├── ty.toml
 ├── pytest.toml
 ├── poe.toml
+├── .gitignore
 └── .pre-commit-config.yaml
 ```
 
@@ -38,12 +39,12 @@ Enter a project name or path when prompted.
 ## Available Commands
 
 ```bash
-poe format      # Format code
-poe lint        # Lint code
-poe lint-fix    # Lint and auto-fix
-poe type-check  # Type check
-poe test        # Run tests
-poe check       # Run all checks
+uv run poe format      # Format code
+uv run poe lint        # Lint code
+uv run poe lint-fix    # Lint and auto-fix
+uv run poe type-check  # Type check
+uv run poe test        # Run tests
+uv run poe check       # Run all checks
 ```
 
 ## Getting Started
