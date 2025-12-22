@@ -1,0 +1,7 @@
+[tool.poe.tasks]
+format = "ruff format ."
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+type-check = "ty check"
+test = "pytest"
+check = ["format", "lint", "type-check", "test"]
