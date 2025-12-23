@@ -9,54 +9,48 @@ read -p "Enter project name or path: " PROJECT_INPUT
 PROJECT_NAME=$(basename "$PROJECT_INPUT")
 PROJECT_PATH="$PROJECT_INPUT"
 
-echo "Creating project: $PROJECT_NAME at $PROJECT_PATH"
-echo ""
+if [ -d "$PROJECT_PATH" ] && [ "$(ls -A "$PROJECT_PATH")" ]; then
+    echo "Warning: Directory $PROJECT_PATH already exists and is not empty"
+    read -p "Continue anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
 
 mkdir -p "$PROJECT_PATH"
 cd "$PROJECT_PATH"
 
-echo "Initializing project with uv..."
+echo
+echo "Initializing $PROJECT_NAME at $PROJECT_PATH with uv..."
 uv init --name "$PROJECT_NAME"
-echo ""
+echo
 
 echo "Installing development tools..."
-uv add --dev -q ruff
-uv add --dev -q ty
-uv add --dev -q poethepoet
-uv add --dev -q pytest
-uv add --dev -q pre-commit
-echo ""
+uv add --dev -q ruff ty poethepoet pytest pre-commit
+echo "✓ Installed: ruff, ty, poethepoet, pytest, pre-commit"
+echo
 
-echo "Adding tool configurations to pyproject.toml..."
-
-{
-    echo ""
-    cat "$TEMPLATE_DIR/ruff.toml"
-    echo ""
-    cat "$TEMPLATE_DIR/ty.toml"
-    echo ""
-    cat "$TEMPLATE_DIR/pytest.toml"
-    echo ""
-    cat "$TEMPLATE_DIR/poe.toml"
-    echo ""
-} >> pyproject.toml
-
+echo "Adding tool configurations..."
+echo >> pyproject.toml
+for file in "$TEMPLATE_DIR"/*.toml; do
+    echo "$(basename "$file")"
+    cat "$file" >> pyproject.toml
+    echo >> pyproject.toml
+done
 echo "Configuration files merged into pyproject.toml"
-echo ""
-
-cp "$TEMPLATE_DIR/.pre-commit-config.yaml" .
-
-echo "Installing pre-commit hooks..."
-uv run pre-commit install
-echo ""
+echo
 
 echo "Setting up .gitignore"
 cp "$TEMPLATE_DIR/.gitignore" .
-echo ""
+cp "$TEMPLATE_DIR/.pre-commit-config.yaml" .
+uv run pre-commit install
+echo "Pre-commit will run on git commit!"
+echo
 
-echo "Creating tests directory..."
 mkdir -p tests
 touch tests/__init__.py
+echo "Tests directory created."
 
 cat > tests/test_true.py << 'EOF'
 def test_true():
@@ -64,18 +58,11 @@ def test_true():
     assert True
 EOF
 
-echo "✨ Project '$PROJECT_NAME' created successfully at: $PROJECT_PATH"
-echo ""
-echo "Available poe tasks:"
-echo "  poe format     - Format code with ruff"
-echo "  poe lint       - Lint code with ruff"
-echo "  poe lint-fix   - Lint and auto-fix issues"
-echo "  poe type-check - Run type checking with ty"
-echo "  poe test       - Run tests with pytest"
-echo "  poe check      - Run all checks (format, lint, type-check, test)"
-echo ""
-echo "Pre-commit hooks installed and will run on git commit."
-echo ""
+echo
+echo "✨ Project '$PROJECT_NAME' created successfully!"
+echo
 echo "To get started:"
 echo "  cd $PROJECT_PATH"
-echo "  uv run poe check"
+echo "  uv run main.py        # Run the application"
+echo "  uv run poe check      # Run all checks"
+echo "  uv run poe            # Show all tasks"
